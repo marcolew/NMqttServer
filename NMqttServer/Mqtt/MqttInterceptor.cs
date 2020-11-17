@@ -1,4 +1,5 @@
-﻿using MQTTnet.Server;
+﻿using MQTTnet.Protocol;
+using MQTTnet.Server;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +33,30 @@ namespace NMqttServer.Mqtt
                 context.AcceptSubscription = false;
             }
             return context;
+        }
+
+        public MqttConnectionValidatorContext Authentication(MqttConnectionValidatorContext c)
+        {
+            if (c.ClientId.Length < 10)
+            {
+                c.ReasonCode = MqttConnectReasonCode.ClientIdentifierNotValid;
+                return c;
+            }
+
+            if (c.Username != "mySecretUser")
+            {
+                c.ReasonCode = MqttConnectReasonCode.BadUserNameOrPassword;
+                return c;
+            }
+
+            if (c.Password != "mySecretPassword")
+            {
+                c.ReasonCode = MqttConnectReasonCode.BadUserNameOrPassword;
+                return c;
+            }
+
+            c.ReasonCode = MqttConnectReasonCode.Success;
+            return c;
         }
     }
 }

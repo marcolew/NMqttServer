@@ -8,5 +8,6 @@ namespace NMqttServer.Mqtt
     {
         MqttApplicationMessageInterceptorContext GetMessageInterceptorValue(MqttApplicationMessageInterceptorContext context);
         MqttSubscriptionInterceptorContext GetSubscriptionInterceptorValue(MqttSubscriptionInterceptorContext context);
+        MqttConnectionValidatorContext Authentication(MqttConnectionValidatorContext c);
     }
 }

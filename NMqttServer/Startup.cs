@@ -37,6 +37,7 @@ namespace NMqttServer
             services.AddHostedMqttServer(builder =>
                 builder
                     .WithDefaultEndpointPort(1883)
+                    .WithConnectionValidator(value => mqttIn.Authentication(value))
                     .WithSubscriptionInterceptor(context => mqttIn.GetSubscriptionInterceptorValue(context))
                     .WithApplicationMessageInterceptor(context => mqttIn.GetMessageInterceptorValue(context))
                 ) ;
