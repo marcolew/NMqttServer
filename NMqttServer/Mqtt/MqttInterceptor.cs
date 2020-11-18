@@ -1,5 +1,7 @@
-﻿using MQTTnet.Protocol;
+﻿using LiteDB;
+using MQTTnet.Protocol;
 using MQTTnet.Server;
+using NMqttServer.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +11,13 @@ namespace NMqttServer.Mqtt
 {
     public class MqttInterceptor : IMqttInterceptor
     {
+        private ILiteDatabase _db;
+
+        public MqttInterceptor(ILiteDatabase db)
+        {
+            _db = db;
+        }
+
         public MqttApplicationMessageInterceptorContext GetMessageInterceptorValue(MqttApplicationMessageInterceptorContext context)
         {
             if (!context.ApplicationMessage.Topic.StartsWith("test"))
@@ -37,19 +46,15 @@ namespace NMqttServer.Mqtt
 
         public MqttConnectionValidatorContext Authentication(MqttConnectionValidatorContext c)
         {
-            if (c.ClientId.Length < 10)
+            var q = _db.GetCollection<Device>("devices").FindOne(x => x.ClientId == c.ClientId);
+
+            if(q == null)
             {
                 c.ReasonCode = MqttConnectReasonCode.ClientIdentifierNotValid;
                 return c;
             }
 
-            if (c.Username != "mySecretUser")
-            {
-                c.ReasonCode = MqttConnectReasonCode.BadUserNameOrPassword;
-                return c;
-            }
-
-            if (c.Password != "mySecretPassword")
+            if(!q.VerifyCredentials(c.Username, c.Password))
             {
                 c.ReasonCode = MqttConnectReasonCode.BadUserNameOrPassword;
                 return c;
